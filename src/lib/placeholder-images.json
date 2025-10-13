@@ -1,3 +1,22 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "vacation-photo-1",
+      "description": "A vacation photo",
+      "imageUrl": "https://picsum.photos/seed/101/200/200",
+      "imageHint": "vacation beach"
+    },
+    {
+      "id": "team-photo-2024",
+      "description": "A team photo",
+      "imageUrl": "https://picsum.photos/seed/102/200/200",
+      "imageHint": "team office"
+    },
+    {
+      "id": "logo-final",
+      "description": "A logo file",
+      "imageUrl": "https://picsum.photos/seed/103/200/200",
+      "imageHint": "logo design"
+    }
+  ]
 }
