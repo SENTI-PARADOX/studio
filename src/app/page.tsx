@@ -13,6 +13,9 @@ export default function Home() {
         <p className="text-muted-foreground mt-2 text-lg md:text-xl">
           Seamlessly share files across your devices. Fast and simple.
         </p>
+        <p className="font-decorative text-4xl text-primary mt-4">
+          prince
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">

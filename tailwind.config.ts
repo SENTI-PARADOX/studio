@@ -20,6 +20,7 @@ export default {
         body: ['"PT Sans"', 'sans-serif'],
         headline: ['Poppins', 'sans-serif'],
         code: ['monospace'],
+        decorative: ['"Dancing Script"', 'cursive'],
       },
       colors: {
         background: 'hsl(var(--background))',
