@@ -16,7 +16,7 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-        <Card className="hover:shadow-primary/20 hover:shadow-lg transition-shadow duration-300">
+        <Card className="hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-headline text-3xl">
               <Send className="text-primary" />
@@ -27,13 +27,13 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild size="lg" className="w-full font-bold text-lg">
+            <Button asChild size="lg" className="w-full font-bold text-lg transition-transform duration-200 transform hover:scale-105">
               <Link href="/send">Start Sending</Link>
             </Button>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-accent/20 hover:shadow-lg transition-shadow duration-300">
+        <Card className="hover:shadow-accent/20 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-headline text-3xl">
               <Download className="text-accent" />
@@ -44,7 +44,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild size="lg" variant="secondary" className="w-full font-bold text-lg bg-accent/20 hover:bg-accent/30 text-accent-foreground dark:text-accent">
+            <Button asChild size="lg" variant="secondary" className="w-full font-bold text-lg bg-accent/20 hover:bg-accent/30 text-accent-foreground dark:text-accent transition-transform duration-200 transform hover:scale-105">
               <Link href="/receive">Start Receiving</Link>
             </Button>
           </CardContent>
@@ -52,7 +52,7 @@ export default function Home() {
       </div>
       
       <div className="mt-12">
-        <Button asChild variant="ghost" className="text-muted-foreground hover:text-primary">
+        <Button asChild variant="ghost" className="text-muted-foreground hover:text-primary transition-colors">
           <Link href="/history" className="flex items-center gap-2">
             <History size={18} />
             View Transfer History

@@ -186,7 +186,7 @@ export default function SendPage() {
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           <Card 
-            className={cn("transition-colors", isDragOver && "border-primary bg-primary/5")}
+            className={cn("transition-colors duration-300", isDragOver && "border-primary bg-primary/5")}
             onDrop={handleDrop} 
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -194,7 +194,7 @@ export default function SendPage() {
             <CardContent className="p-6">
                 <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-lg text-center cursor-pointer hover:bg-secondary/50 transition-colors"
+                    className="flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-lg text-center cursor-pointer hover:bg-secondary/50 transition-colors duration-300"
                 >
                     <UploadCloud className="h-12 w-12 text-muted-foreground" />
                     <p className="mt-4 font-semibold">Click to browse or drag and drop files</p>
@@ -212,7 +212,7 @@ export default function SendPage() {
         </div>
 
         <div>
-          <Card>
+          <Card className="transition-all duration-300">
             <CardHeader>
               <CardTitle className="font-headline">Selected Files ({files.length})</CardTitle>
               <CardDescription>Enter the receiver's PIN and hit send.</CardDescription>
@@ -254,7 +254,7 @@ export default function SendPage() {
                     className="mt-1 font-mono text-lg tracking-widest"
                   />
                 </div>
-                <Button size="lg" onClick={handleSend} disabled={files.length === 0 || pin.length !== 6}>
+                <Button size="lg" onClick={handleSend} disabled={files.length === 0 || pin.length !== 6} className="transition-transform duration-200 transform hover:scale-105">
                   <SendIcon size={18} />
                   Send
                 </Button>

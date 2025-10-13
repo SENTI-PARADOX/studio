@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import QRCode from "react-qr-code";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { QrCodePlaceholder } from "@/components/qr-code-placeholder";
 import { Button } from "@/components/ui/button";
 import { FileIcon } from "@/components/file-icon";
 import { Progress } from "@/components/ui/progress";
@@ -70,7 +70,7 @@ export default function ReceivePage() {
       <h1 className="text-4xl font-headline font-bold mb-8">Receive Files</h1>
       
       {status === 'waiting' && (
-        <Card className="max-w-4xl mx-auto">
+        <Card className="max-w-4xl mx-auto transition-all duration-300">
           <CardHeader className="text-center">
             <Wifi className="mx-auto h-12 w-12 text-primary animate-pulse" />
             <CardTitle className="font-headline text-3xl mt-4">Ready to Receive</CardTitle>
@@ -88,13 +88,13 @@ export default function ReceivePage() {
             </div>
             <div className="flex justify-center items-center">
                 <div className="w-48 h-48 p-3 bg-white rounded-lg shadow-md">
-                    <QrCodePlaceholder />
+                    {pin && <QRCode value={pin} size={256} style={{ height: "auto", maxWidth: "100%", width: "100%" }} viewBox={`0 0 256 256`} />}
                 </div>
             </div>
           </CardContent>
           <div className="p-6 pt-0 text-center text-sm text-muted-foreground">
             <p>Waiting for sender to connect...</p>
-            <Button onClick={() => setStatus('receiving')} variant="link" className="mt-2">Or, click here to simulate receiving files</Button>
+            <Button onClick={() => setStatus('receiving')} className="mt-4">Simulate Receiving Files</Button>
           </div>
         </Card>
       )}
