@@ -7,10 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { FileIcon } from "@/components/file-icon";
-import { UploadCloud, X, Send as SendIcon } from "lucide-react";
+import { UploadCloud, X, Send as SendIcon, QrCode } from "lucide-react";
 import type { FileInfo } from '@/lib/data';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import QrCodeReader from 'qrcode-reader';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const getFileInfo = (file: File): FileInfo => {
     const sizeInMB = file.size / (1024 * 1024);
@@ -38,6 +41,11 @@ export default function SendPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const qrReader = new QrCodeReader();
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -78,6 +86,63 @@ export default function SendPage() {
       });
     };
   }, [files]);
+
+  useEffect(() => {
+    if (isScannerOpen) {
+      const getCameraPermission = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          setHasCameraPermission(true);
+  
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (error) {
+          console.error('Error accessing camera:', error);
+          setHasCameraPermission(false);
+          toast({
+            variant: 'destructive',
+            title: 'Camera Access Denied',
+            description: 'Please enable camera permissions in your browser settings to use this app.',
+          });
+        }
+      };
+      getCameraPermission();
+    } else {
+        if(videoRef.current && videoRef.current.srcObject) {
+            const stream = videoRef.current.srcObject as MediaStream;
+            stream.getTracks().forEach(track => track.stop());
+        }
+    }
+  }, [isScannerOpen, toast]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isScannerOpen && hasCameraPermission && videoRef.current) {
+        const video = videoRef.current;
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        qrReader.callback = (error, value) => {
+            if (value) {
+                setPin(value.result);
+                setIsScannerOpen(false);
+                toast({ title: 'QR Code Scanned!', description: 'PIN has been filled in.' });
+            }
+        };
+
+        interval = setInterval(() => {
+            if (video.readyState === video.HAVE_ENOUGH_DATA && context) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                qrReader.decode(imageData);
+            }
+        }, 500);
+    }
+    return () => clearInterval(interval);
+  }, [isScannerOpen, hasCameraPermission, toast]);
 
   const handleFileChange = (selectedFiles: FileList | null) => {
     if (selectedFiles) {
@@ -247,7 +312,7 @@ export default function SendPage() {
                         <p>No files selected yet.</p>
                     </div>
                 )}
-              <div className="flex items-end gap-4 mt-4">
+              <div className="flex items-end gap-2 mt-4">
                 <div className="flex-grow">
                   <label htmlFor="pin" className="text-sm font-medium">Receiver's PIN</label>
                   <Input 
@@ -259,6 +324,10 @@ export default function SendPage() {
                     className="mt-1 font-mono text-lg tracking-widest"
                   />
                 </div>
+                <Button variant="outline" size="icon" className="h-11 w-11" onClick={() => setIsScannerOpen(true)}>
+                  <QrCode size={20} />
+                  <span className="sr-only">Scan QR Code</span>
+                </Button>
                 <Button size="lg" onClick={handleSend} disabled={files.length === 0 || pin.length !== 6} className="transition-transform duration-200 transform hover:scale-105">
                   <SendIcon size={18} />
                   Send
@@ -268,6 +337,28 @@ export default function SendPage() {
           </Card>
         </div>
       </div>
+      <Dialog open={isScannerOpen} onOpenChange={setIsScannerOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Scan QR Code</DialogTitle>
+            <DialogDescription>
+              Point your camera at the QR code on the receiver's screen.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='relative aspect-square w-full'>
+            <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted playsInline />
+            <div className="absolute inset-0 border-4 border-primary/50 rounded-md pointer-events-none" />
+          </div>
+          {hasCameraPermission === false && (
+            <Alert variant="destructive">
+                <AlertTitle>Camera Access Required</AlertTitle>
+                <AlertDescription>
+                    Please allow camera access to use this feature.
+                </AlertDescription>
+            </Alert>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
