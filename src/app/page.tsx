@@ -14,7 +14,10 @@ export default function Home() {
           Seamlessly share files across your devices. Fast and simple.
         </p>
         <p className="font-decorative text-4xl text-primary mt-4">
-          prince
+          THE PRINCE
+        </p>
+        <p className="font-decorative text-2xl text-accent mt-2">
+          THE BOY OF JNV KODERMA
         </p>
       </div>
 
