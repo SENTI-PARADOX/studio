@@ -38,10 +38,6 @@ export default function ReceivePage() {
           if (newProgress >= 100) {
             clearInterval(timer);
             setStatus('completed');
-            toast({
-              title: "Transfer Complete",
-              description: `Received ${mockReceivedFiles.length} files.`,
-            });
             return 100;
           }
           return newProgress;
@@ -49,6 +45,15 @@ export default function ReceivePage() {
       }, 200);
     }
     return () => clearInterval(timer);
+  }, [status]);
+  
+  useEffect(() => {
+    if (status === 'completed') {
+      toast({
+        title: "Transfer Complete",
+        description: `Received ${mockReceivedFiles.length} files.`,
+      });
+    }
   }, [status, toast]);
   
   const handleCopyPin = () => {

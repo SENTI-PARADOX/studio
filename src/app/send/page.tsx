@@ -49,10 +49,6 @@ export default function SendPage() {
           if (newProgress >= 100) {
             clearInterval(timer);
             setStatus('sent');
-            toast({
-              title: "Transfer Complete",
-              description: `Sent ${files.length} files successfully.`,
-            });
             return 100;
           }
           return newProgress;
@@ -62,6 +58,15 @@ export default function SendPage() {
     return () => {
       clearInterval(timer);
     }
+  }, [status]);
+  
+  useEffect(() => {
+      if (status === 'sent') {
+          toast({
+              title: "Transfer Complete",
+              description: `Sent ${files.length} files successfully.`,
+          });
+      }
   }, [status, files.length, toast]);
 
   useEffect(() => {
