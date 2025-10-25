@@ -1,0 +1,90 @@
+/**
+ * @fileoverview Firestore Security Rules for File Sharing App
+ *
+ * Core Philosophy:
+ * This ruleset enforces a device-centric security model. Each device has a document
+ * in the `/devices` collection, and all transfers initiated by that device are stored
+ * in a subcollection `/devices/{deviceId}/transfers`.  Access is generally restricted
+ * to the device itself, ensuring that only the device can read or modify its own data.
+ *
+ * Data Structure:
+ * - `/devices/{deviceId}`: Stores device information.
+ * - `/devices/{deviceId}/transfers/{transferId}`: Stores transfer information for a specific device.
+ *
+ * Key Security Decisions:
+ * - Devices can only read and write their own device documents.
+ * - Devices can only read and write transfer documents under their own device document.
+ * - Listing all devices is disallowed. This prevents unauthorized discovery of devices.
+ * - Data validation is relaxed in this prototype to allow for rapid schema iteration.
+ *
+ * Denormalization for Authorization:
+ * The `Transfer` documents include `senderDeviceId` and `receiverDeviceId`.  While
+ * not strictly required for the current rules, these fields allow for future expansion
+ * to support more complex authorization scenarios (e.g., allowing the receiving device
+ * to acknowledge or reject a transfer).  They can also be used for querying.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Controls access to device information.
+     * @path /devices/{deviceId}
+     * @allow (create) A device can create its own device document.
+     * @allow (get) A device can read its own device document.
+     * @allow (update) A device can update its own device document.
+     * @allow (delete) A device can delete its own device document.
+     * @deny (create) A device cannot create a device document with a mismatched ID.
+     * @deny (get) A device cannot read another device's document.
+     * @deny (update) A device cannot update another device's document.
+     * @deny (delete) A device cannot delete another device's document.
+     * @principle Enforces device ownership.
+     */
+    match /devices/{deviceId} {
+      function isOwner(deviceId) {
+        return request.auth.uid == deviceId;
+      }
+
+      function isExistingOwner(deviceId) {
+        return isOwner(deviceId) && resource != null;
+      }
+
+      allow get: if isOwner(deviceId);
+      allow list: if false; // Listing devices is not permitted
+
+      allow create: if isOwner(deviceId);
+      allow update: if isExistingOwner(deviceId);
+      allow delete: if isExistingOwner(deviceId);
+    }
+
+    /**
+     * @description Controls access to transfer information for a specific device.
+     * @path /devices/{deviceId}/transfers/{transferId}
+     * @allow (create) A device can create transfer documents under its own device document.
+     * @allow (get) A device can read transfer documents under its own device document.
+     * @allow (update) A device can update transfer documents under its own device document.
+     * @allow (delete) A device can delete transfer documents under its own device document.
+     * @deny (create) A device cannot create transfer documents under another device's document.
+     * @deny (get) A device cannot read transfer documents under another device's document.
+     * @deny (update) A device cannot update transfer documents under another device's document.
+     * @deny (delete) A device cannot delete transfer documents under another device's document.
+     * @principle Enforces device ownership for transfer operations.
+     */
+    match /devices/{deviceId}/transfers/{transferId} {
+       function isOwner(deviceId) {
+        return request.auth.uid == deviceId;
+      }
+
+      function isExistingOwner(deviceId) {
+        return isOwner(deviceId) && resource != null;
+      }
+
+      allow get: if isOwner(deviceId);
+      allow list: if isOwner(deviceId);
+
+      allow create: if isOwner(deviceId);
+      allow update: if isExistingOwner(deviceId);
+      allow delete: if isExistingOwner(deviceId);
+    }
+  }
+}

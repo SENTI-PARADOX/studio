@@ -1,0 +1,153 @@
+{
+  "entities": {
+    "Transfer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Transfer",
+      "type": "object",
+      "description": "Represents a file transfer operation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the transfer entity."
+        },
+        "fileName": {
+          "type": "string",
+          "description": "Name of the file being transferred."
+        },
+        "fileSize": {
+          "type": "number",
+          "description": "Size of the file in bytes."
+        },
+        "transferStartTime": {
+          "type": "string",
+          "description": "Timestamp when the transfer started.",
+          "format": "date-time"
+        },
+        "transferEndTime": {
+          "type": "string",
+          "description": "Timestamp when the transfer ended.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the transfer (e.g., 'pending', 'inProgress', 'completed', 'failed')."
+        },
+        "senderDeviceId": {
+          "type": "string",
+          "description": "Reference to the sending Device. (Relationship: Device 1:N Transfer (as sender))"
+        },
+        "receiverDeviceId": {
+          "type": "string",
+          "description": "Reference to the receiving Device. (Relationship: Device 1:N Transfer (as receiver))"
+        },
+        "transferType": {
+          "type": "string",
+          "description": "The transfer type (e.g., send, receive)"
+        },
+        "filePath": {
+          "type": "string",
+          "description": "The location path of the transferred file"
+        }
+      },
+      "required": [
+        "id",
+        "fileName",
+        "fileSize",
+        "transferStartTime",
+        "status",
+        "senderDeviceId",
+        "receiverDeviceId",
+        "transferType",
+        "filePath"
+      ]
+    },
+    "Device": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Device",
+      "type": "object",
+      "description": "Represents a device participating in file sharing.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the device entity."
+        },
+        "deviceName": {
+          "type": "string",
+          "description": "Name of the device (e.g., 'My Phone', 'John's Tablet')."
+        },
+        "ipAddress": {
+          "type": "string",
+          "description": "IP address of the device on the network."
+        },
+        "macAddress": {
+          "type": "string",
+          "description": "MAC address of the device."
+        },
+        "lastSeen": {
+          "type": "string",
+          "description": "Timestamp of the last time the device was seen on the network.",
+          "format": "date-time"
+        },
+        "connectionType": {
+          "type": "string",
+          "description": "Type of connection used (e.g., 'wifiDirect', 'hotspot', 'lan')."
+        }
+      },
+      "required": [
+        "id",
+        "deviceName",
+        "ipAddress",
+        "macAddress",
+        "lastSeen",
+        "connectionType"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/devices/{deviceId}",
+        "definition": {
+          "entityName": "Device",
+          "schema": {
+            "$ref": "#/backend/entities/Device"
+          },
+          "description": "Stores device information. Includes the device ID.",
+          "params": [
+            {
+              "name": "deviceId",
+              "description": "Unique identifier for the device."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/devices/{deviceId}/transfers/{transferId}",
+        "definition": {
+          "entityName": "Transfer",
+          "schema": {
+            "$ref": "#/backend/entities/Transfer"
+          },
+          "description": "Stores transfer information for a specific device. Includes denormalized senderDeviceId and receiverDeviceId for authorization.",
+          "params": [
+            {
+              "name": "deviceId",
+              "description": "The ID of the device initiating the transfer."
+            },
+            {
+              "name": "transferId",
+              "description": "Unique identifier for the transfer."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure prioritizes authorization independence and QAPs. Devices are stored at the top level, and transfers are stored as a subcollection under each device to track transfers initiated by each device. This structure facilitates simple, robust, and easily debuggable security rules because all documents in a collection share the same security requirements. The 'nearby' functionality is handled via the `Device` collection and requires read access to this collection to implement device discovery."
+  }
+}
